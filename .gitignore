@@ -1,0 +1,9 @@
+# variáveis de ambiente e segredos
+.env
+.env.*
+*.local
+
+# sistema
+.DS_Store
+Thumbs.db
+node_modules/

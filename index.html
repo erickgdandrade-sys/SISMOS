@@ -1,0 +1,796 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Sismos: visão computacional que lê o nível de material nas câmeras da planta e aciona o britador automaticamente.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 96 96%27%3E%3Crect width=%2796%27 height=%2796%27 rx=%2722%27 fill=%27%231E2328%27/%3E%3Cpolyline points=%2712,50 26,50 34,26 44,72 52,18 61,64 67,44 84,44%27 fill=%27none%27 stroke=%27%23E8A33D%27 stroke-width=%279%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E">
+<title>Sismos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: faixas de largura total alternando carvão e pedra; uma demo ao vivo como peça central, ritmo de sismógrafo como fio condutor */
+:root{
+  --carvao:#1E2328; --carvao-2:#15181C; --painel:#262C33; --linha:#3A4048;
+  --pedra:#F2EFE8; --pedra-2:#FBFAF6; --linha-clara:#DDD8CC;
+  --ambar:#E8A33D; --ambar-txt:#96570A; --aco:#8A949C;
+  --txt-claro:#B9C0C6; --txt-claro-2:#D5D9DD; --txt-escuro:#4B5259; --alerta:#F2875F;
+  --f-display:'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  --f-body:'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+  --f-mono:'IBM Plex Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
+  --max:1200px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--carvao);color:var(--pedra);font-family:var(--f-body);font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--carvao-2)}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;letter-spacing:-0.01em}
+p{margin:0}
+a{color:inherit}
+.wrap{max-width:var(--max);margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.band{padding-block:clamp(72px,10vw,128px)}
+.band.claro{background:var(--pedra);color:var(--carvao)}
+.band.escuro-2{background:var(--carvao-2)}
+.eyebrow{font-family:var(--f-mono);font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--ambar)}
+.claro .eyebrow{color:var(--ambar-txt)}
+.h2{font-size:clamp(32px,4.4vw,54px);font-weight:600;line-height:1.08}
+.lead{font-size:clamp(17px,1.6vw,20px);color:var(--txt-claro);max-width:60ch}
+.claro .lead{color:var(--txt-escuro)}
+.sec-head{display:flex;flex-direction:column;gap:16px;margin-bottom:clamp(40px,5vw,64px)}
+:focus-visible{outline:2px solid var(--ambar);outline-offset:3px}
+
+/* ---------- logo ---------- */
+.logo{display:inline-flex;align-items:center;gap:12px;text-decoration:none}
+.logo svg{width:36px;height:36px;flex:none}
+.wordmark{font-family:var(--f-display);font-weight:700;font-size:22px;letter-spacing:.04em;line-height:1}
+.wordmark .slash{display:inline-block;transform:skewX(-24deg);margin:0 .02em}
+
+/* ---------- nav ---------- */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:color-mix(in srgb,var(--carvao-2) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--linha)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:24px;height:68px}
+.nav ul{display:flex;gap:28px;list-style:none;margin:0;padding:0;font-size:15px}
+.nav ul a{text-decoration:none;color:var(--txt-claro);transition:color .2s}
+.nav ul a:hover{color:var(--pedra)}
+.btn{display:inline-flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:600;font-size:16px;padding:12px 20px;border-radius:10px;text-decoration:none;border:1px solid transparent;cursor:pointer;transition:transform .2s, background .2s, border-color .2s}
+.btn-ambar{background:var(--ambar);color:var(--carvao)}
+.btn-ambar:hover{transform:translateY(-2px);background:#F0B256}
+.btn-linha{border-color:var(--linha);color:var(--pedra);background:transparent}
+.btn-linha:hover{border-color:var(--aco)}
+@media (max-width:860px){.nav ul{display:none}}
+
+/* ---------- hero ---------- */
+.hero{position:relative;overflow:hidden;background:var(--carvao);padding-block:clamp(72px,9vw,120px) 0}
+.hero-grid{position:relative;z-index:2;display:grid;grid-template-columns:1.25fr .75fr;gap:48px;align-items:end}
+.hero h1{font-size:clamp(42px,6.6vw,88px);font-weight:600;line-height:1.02;letter-spacing:-0.02em;margin-top:22px}
+.hero h1 em{font-style:normal;color:var(--ambar)}
+.hero .lead{margin-top:28px}
+.hero-ctas{display:flex;flex-wrap:wrap;gap:14px;margin-top:36px}
+.hero-card{background:var(--painel);border:1px solid var(--linha);border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.hero-card .row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-family:var(--f-mono);font-size:13px;color:var(--txt-claro);letter-spacing:.06em}
+.hero-card .big{font-family:var(--f-display);font-size:44px;font-weight:700;line-height:1;color:var(--pedra)}
+.hero-card .live{display:inline-flex;align-items:center;gap:8px;color:var(--ambar)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ambar);animation:pulso 1.4s ease-in-out infinite}
+@keyframes pulso{50%{opacity:.25}}
+.mini-bars{display:flex;flex-direction:column;gap:8px}
+.mini-bar{display:grid;grid-template-columns:118px 1fr 42px;align-items:center;gap:10px;font-size:13px;font-family:var(--f-mono);color:var(--txt-claro)}
+.mini-bar .trk{height:6px;background:var(--linha);border-radius:3px;overflow:hidden}
+.mini-bar .fill{height:100%;background:var(--aco);border-radius:3px;transition:width .5s}
+.mini-bar.on .fill{background:var(--ambar)}
+.mini-bar.on{color:var(--pedra)}
+.seismo{position:relative;z-index:1;display:block;width:100%;height:180px;margin-top:56px}
+.hero-stats{position:relative;z-index:2;border-top:1px solid var(--linha);display:grid;grid-template-columns:repeat(3,1fr)}
+.hero-stats div{padding:26px 24px 30px 0;display:flex;flex-direction:column;gap:6px}
+.hero-stats div+div{padding-left:24px;border-left:1px solid var(--linha)}
+.hero-stats b{font-family:var(--f-display);font-size:clamp(26px,3vw,36px);font-weight:700}
+.hero-stats span{font-size:15px;color:var(--txt-claro)}
+@media (max-width:900px){.hero-grid{grid-template-columns:1fr}}
+@media (max-width:640px){.hero-stats{grid-template-columns:1fr}.hero-stats div+div{padding-left:0;border-left:none;border-top:1px solid var(--linha)}}
+
+/* ---------- problema ---------- */
+.prob-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(32px,6vw,96px);align-items:start}
+.counter{white-space:nowrap;font-family:var(--f-display);font-weight:700;font-size:clamp(72px,12vw,180px);line-height:.9;letter-spacing:-0.04em;font-variant-numeric:tabular-nums}
+.counter small{font-size:.42em;letter-spacing:-0.02em}
+.prob-sub{font-family:var(--f-display);font-size:clamp(24px,3vw,36px);font-weight:500;line-height:1.15;margin-top:18px;max-width:18ch}
+.prob-side{border-left:4px solid var(--ambar);padding-left:28px;display:flex;flex-direction:column;gap:18px}
+.prob-side p{font-size:19px}
+.prob-side p.muted{color:var(--txt-escuro);font-size:17px}
+.cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:clamp(56px,7vw,88px)}
+.card{background:var(--pedra-2);border:1px solid var(--linha-clara);border-radius:18px;padding:30px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.card h3{font-size:24px;font-weight:600}
+.card p{color:var(--txt-escuro)}
+.card.escuro{background:var(--carvao);border-color:var(--carvao);color:var(--pedra)}
+.card.escuro p{color:var(--txt-claro)}
+.card svg{width:40px;height:40px}
+@media (max-width:860px){.prob-grid,.cards3{grid-template-columns:1fr}}
+
+.campo{display:flex;flex-direction:column;gap:6px;font-size:15px;color:var(--txt-escuro)}
+.campo input{font-family:var(--f-display);font-size:24px;font-weight:600;color:var(--carvao);background:var(--pedra-2);border:1px solid var(--linha-clara);border-radius:10px;padding:10px 14px;width:100%;max-width:280px}
+.campo input:focus{outline:2px solid var(--ambar);outline-offset:1px}
+.resultado{display:flex;flex-direction:column;gap:4px;padding-top:8px}
+.resultado .counter{font-size:clamp(56px,8vw,96px);color:var(--carvao)}
+.fcampo{display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--txt-claro)}
+.fcampo input{font-family:var(--f-body);font-size:17px;color:var(--pedra);background:var(--carvao-2);border:1px solid var(--linha);border-radius:10px;padding:12px 14px;width:100%}
+.fcampo input::placeholder{color:#6B727A}
+.fcampo input:focus{outline:2px solid var(--ambar);outline-offset:1px;border-color:transparent}
+.fcampo input[aria-invalid="true"]{border-color:var(--alerta)}
+.ferro{font-size:14px;color:var(--alerta)}
+.fbtn{justify-content:center;width:100%;padding:14px 20px;font-size:17px}
+/* ---------- demo ---------- */
+.demo{display:grid;grid-template-columns:1.35fr 1fr;gap:20px}
+.panel{background:var(--painel);border:1px solid var(--linha);border-radius:18px;min-width:0}
+.cam{position:relative;overflow:hidden;padding:0}
+.cam canvas{display:block;width:100%;aspect-ratio:16/11;border-radius:18px 18px 0 0}
+.cam-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;border-top:1px solid var(--linha)}
+.ctrls{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-family:var(--f-mono);font-size:13px;letter-spacing:.04em;padding:8px 12px;border-radius:8px;border:1px solid var(--linha);background:transparent;color:var(--txt-claro);cursor:pointer;transition:all .2s}
+.chip:hover{border-color:var(--aco);color:var(--pedra)}
+.chip[aria-pressed="true"]{background:var(--ambar);border-color:var(--ambar);color:var(--carvao)}
+.side{display:flex;flex-direction:column;gap:20px;min-width:0}
+.side .panel{padding:22px}
+.lbl{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--aco)}
+.estado{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:12px}
+.estado b{font-family:var(--f-display);font-size:30px;font-weight:700;line-height:1.1}
+.pill{font-family:var(--f-mono);font-size:13px;font-weight:500;letter-spacing:.08em;padding:8px 12px;border-radius:999px;border:1px solid var(--linha);white-space:nowrap;display:inline-flex;align-items:center;gap:8px}
+.pill.on{background:var(--ambar);color:var(--carvao);border-color:var(--ambar)}
+.pill.off{color:var(--txt-claro)}
+.pill.alert{border-color:var(--alerta);color:var(--alerta)}
+.conf{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.conf .mini-bar{grid-template-columns:120px 1fr 44px;font-size:14px}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;padding-top:18px;border-top:1px solid var(--linha)}
+.meta div{display:flex;flex-direction:column;gap:4px}
+.meta b{font-family:var(--f-display);font-size:24px;font-weight:600;font-variant-numeric:tabular-nums}
+.meta span{font-size:13px;color:var(--txt-claro)}
+.strip{display:block;width:100%;height:130px;margin-top:12px}
+.log{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:2px;font-family:var(--f-mono);font-size:13px;min-height:150px}
+.log li{display:grid;grid-template-columns:76px 1fr;gap:10px;padding:7px 0;border-bottom:1px solid var(--linha);color:var(--txt-claro);animation:entra .4s ease-out}
+.log li time{color:var(--aco)}
+.log li.acao{color:var(--pedra)}
+.log li.alerta{color:var(--alerta)}
+@keyframes entra{from{transform:translateX(-8px);opacity:.2}}
+.demo-note{margin-top:18px;font-size:14px;color:var(--aco)}
+@media (max-width:960px){.demo{grid-template-columns:1fr}}
+
+/* ---------- pipeline ---------- */
+.pipe{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+.pipe-line{position:absolute;left:4%;right:4%;top:34px;height:2px;background:var(--linha-clara);overflow:hidden;z-index:0}
+.pipe-line::after{content:"";position:absolute;top:-3px;left:-12%;width:12%;height:8px;border-radius:4px;background:linear-gradient(90deg,transparent,var(--ambar));animation:corre 3.2s linear infinite}
+@keyframes corre{to{left:100%}}
+.step{position:relative;z-index:1;display:flex;flex-direction:column;gap:12px;min-width:0}
+.step .num{width:68px;height:68px;border-radius:18px;background:var(--pedra-2);border:1px solid var(--linha-clara);display:grid;place-items:center;font-family:var(--f-mono);font-size:15px;color:var(--ambar-txt);transition:all .4s}
+.step.ativo .num{background:var(--carvao);border-color:var(--carvao);color:var(--ambar);transform:translateY(-4px)}
+.step h3{font-size:21px;font-weight:600}
+.step p{color:var(--txt-escuro);font-size:16px}
+.local{margin-top:48px;display:flex;flex-wrap:wrap;gap:12px}
+.tag{font-family:var(--f-mono);font-size:13px;letter-spacing:.06em;padding:9px 14px;border-radius:999px;background:var(--carvao);color:var(--pedra)}
+@media (max-width:900px){.pipe{grid-template-columns:1fr;gap:28px}.pipe-line{left:33px;right:auto;top:20px;bottom:20px;width:2px;height:auto}.pipe-line::after{left:-3px;top:-12%;width:8px;height:12%;background:linear-gradient(180deg,transparent,var(--ambar));animation:desce 3.2s linear infinite}.step{display:grid;grid-template-columns:68px 1fr;column-gap:20px;row-gap:6px}.step .num{grid-row:span 2}}
+@keyframes desce{to{top:100%}}
+
+/* ---------- regra ---------- */
+.regra{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--linha)}
+.regra > div{padding:32px 28px 8px 0;display:flex;flex-direction:column;gap:10px;min-width:0}
+.regra > div+div{padding-left:28px;border-left:1px solid var(--linha)}
+.regra .lbl{color:var(--ambar)}
+.regra h3{font-size:28px;font-weight:600}
+.regra p{color:var(--txt-claro)}
+@media (max-width:760px){.regra{grid-template-columns:1fr}.regra > div+div{padding-left:0;border-left:none;border-top:1px solid var(--linha)}}
+
+/* ---------- fases ---------- */
+.fases{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.fase{background:var(--pedra-2);border:1px solid var(--linha-clara);border-radius:18px;padding:32px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.fase .n{font-family:var(--f-display);font-size:56px;font-weight:700;line-height:1;color:var(--ambar-txt)}
+.fase h3{font-size:26px;font-weight:600}
+.fase p{color:var(--txt-escuro)}
+.fase .quem{margin-top:auto;padding-top:16px;border-top:1px solid var(--linha-clara);font-family:var(--f-mono);font-size:13px;color:var(--carvao)}
+.fase.escuro{background:var(--carvao);border-color:var(--carvao);color:var(--pedra)}
+.fase.escuro .n{color:var(--ambar)}
+.fase.escuro p{color:var(--txt-claro)}
+.fase.escuro .quem{border-color:var(--linha);color:var(--pedra)}
+@media (max-width:860px){.fases{grid-template-columns:1fr}}
+
+/* ---------- seguranca ---------- */
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.seg .item{display:grid;grid-template-columns:44px 1fr;gap:18px;padding:28px;border-radius:18px;background:var(--painel);border:1px solid var(--linha);min-width:0}
+.seg .item svg{width:36px;height:36px}
+.seg h3{font-size:22px;font-weight:600;margin-bottom:6px}
+.seg p{color:var(--txt-claro)}
+@media (max-width:760px){.seg{grid-template-columns:1fr}}
+
+/* ---------- resultados ---------- */
+.res{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}
+.res > div{border-top:3px solid var(--aco);padding-top:24px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.res > div:first-child{border-color:var(--ambar)}
+.res .lbl{color:var(--txt-claro)}
+.res b{font-family:var(--f-display);font-size:clamp(52px,6vw,84px);font-weight:700;line-height:1;letter-spacing:-0.02em}
+.res > div:first-child b{color:var(--ambar)}
+.res p{color:var(--txt-claro-2)}
+@media (max-width:760px){.res{grid-template-columns:1fr}}
+
+/* ---------- cta ---------- */
+.cta{background:var(--ambar);color:var(--carvao);position:relative;overflow:hidden}
+.cta .wrap{position:relative;z-index:1;display:grid;grid-template-columns:1.2fr .8fr;gap:48px;align-items:end}
+.cta h2{font-size:clamp(36px,5vw,64px);font-weight:700;line-height:1.02;letter-spacing:-0.02em}
+.cta .lead{color:#3A2C12;margin-top:20px}
+.cta .eyebrow{color:var(--carvao)}
+.contato{background:var(--carvao);color:var(--pedra);border-radius:18px;padding:28px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.contato .linha{display:flex;justify-content:space-between;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--linha);font-size:16px}
+.contato .linha span:first-child{font-family:var(--f-mono);font-size:13px;color:var(--aco);letter-spacing:.08em}
+.contato .linha span:last-child{user-select:all;overflow-wrap:anywhere;text-align:right}
+.precisa{font-size:14px;color:var(--txt-claro)}
+.cta-mark{position:absolute;right:-60px;top:-60px;width:420px;height:420px;opacity:.12;z-index:0}
+@media (max-width:860px){.cta .wrap{grid-template-columns:1fr}}
+
+footer{background:var(--carvao-2);padding-block:36px}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px;font-size:14px;color:var(--aco)}
+
+/* reveal: elementos começam visíveis; o JS só aplica o deslocamento aos que ainda estão abaixo da dobra */
+.rv.pre{transform:translateY(28px);opacity:.25}
+.rv{transition:transform .8s cubic-bezier(.2,.7,.2,1),opacity .8s ease}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .rv.pre{transform:none;opacity:1}
+  html{scroll-behavior:auto}
+}
+</style>
+<style>body{margin:0}</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-olho" viewBox="0 0 56 56"><g fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="16"/><line x1="36" y1="36" x2="50" y2="50"/></g></symbol>
+    <symbol id="i-relogio" viewBox="0 0 56 56"><g fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><circle cx="28" cy="28" r="22"/><polyline points="28,14 28,28 38,34"/></g></symbol>
+    <symbol id="i-alerta" viewBox="0 0 56 56"><g fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polygon points="28,6 52,48 4,48"/><line x1="28" y1="22" x2="28" y2="34"/><circle cx="28" cy="41" r="1.5"/></g></symbol>
+    <symbol id="i-check" viewBox="0 0 56 56"><g fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><circle cx="28" cy="28" r="22"/><polyline points="17,29 25,37 40,21"/></g></symbol>
+    <symbol id="i-cadeado" viewBox="0 0 56 56"><g fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><rect x="10" y="24" width="36" height="26" rx="4"/><path d="M18 24v-8a10 10 0 0 1 20 0v8"/></g></symbol>
+    <symbol id="simbolo" viewBox="0 0 96 96"><polyline points="12,50 26,50 34,26 44,72 52,18 61,64 67,44 84,44" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
+<nav class="nav" aria-label="Principal">
+  <div class="wrap">
+    <a class="logo" href="#topo" aria-label="Sismos, início">
+      <svg viewBox="0 0 96 96" aria-hidden="true" style="color:var(--pedra)"><use href="#simbolo"/></svg>
+      <span class="wordmark">S<span class="slash">I</span>SMOS</span>
+    </a>
+    <ul>
+      <li><a href="#demo">Ao vivo</a></li>
+      <li><a href="#como">Como funciona</a></li>
+      <li><a href="#implantacao">Implantação</a></li>
+      <li><a href="#seguranca">Segurança</a></li>
+    </ul>
+    <a class="btn btn-ambar" href="#contato">Agendar piloto</a>
+  </div>
+</nav>
+
+<header class="hero" id="topo">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div style="min-width:0">
+        <p class="eyebrow">Visão computacional para mineração e britagem</p>
+        <h1>O britador primário não precisa <em>esperar</em> pelo operador.</h1>
+        <p class="lead">A Sismos lê o nível de material nas câmeras que sua planta já tem e aciona ou desaciona o britador que alimenta a linha sozinha, a cada poucos segundos, 24 horas por dia.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-ambar" href="#demo">Ver funcionando</a>
+          <a class="btn btn-linha" href="#como">Como funciona</a>
+        </div>
+      </div>
+      <aside class="hero-card" aria-label="Leitura atual da simulação">
+        <div class="row"><span>BRITADOR SECUNDÁRIO</span><span class="live"><span class="dot"></span>AO VIVO</span></div>
+        <div class="row" style="align-items:center"><span class="big" id="hcClasse">Intermediário</span></div>
+        <div class="mini-bars" id="hcBars">
+          <div class="mini-bar" data-c="vazio"><span>Vazio</span><span class="trk"><span class="fill" style="width:6%"></span></span><span>0,06</span></div>
+          <div class="mini-bar on" data-c="inter"><span>Intermediário</span><span class="trk"><span class="fill" style="width:88%"></span></span><span>0,88</span></div>
+          <div class="mini-bar" data-c="cheio"><span>Cheio</span><span class="trk"><span class="fill" style="width:6%"></span></span><span>0,06</span></div>
+        </div>
+        <div class="row"><span>BRITADOR PRIMÁRIO</span><span id="hcPrim" style="color:var(--ambar)">LIGADO</span></div>
+      </aside>
+    </div>
+  </div>
+  <canvas class="seismo" id="seismo" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="hero-stats">
+      <div><b>1 leitura por segundo</b><span>em vez de uma checagem a cada poucos minutos</span></div>
+      <div><b>24 h por dia</b><span>inclusive nos turnos sem operador dedicado</span></div>
+      <div><b>0 sensores novos</b><span>usa as câmeras que já estão instaladas</span></div>
+    </div>
+  </div>
+</header>
+
+<section class="band claro" id="problema">
+  <div class="wrap">
+    <div class="prob-grid">
+      <div class="rv" style="min-width:0">
+        <p class="eyebrow">O problema</p>
+        <h2 class="h2" style="max-width:16ch">Britador parado esperando alguém apertar o botão.</h2>
+        <p class="lead" style="margin-top:20px">Em muitas plantas, ligar e desligar o britador primário depende de um operador olhando o nível do equipamento seguinte por uma câmera. Cada minuto entre o esvaziamento e o reacionamento é capacidade de britagem perdida.</p>
+      </div>
+      <div class="prob-side rv">
+        <p class="lbl" style="color:var(--ambar-txt)">Calcule a perda da sua operação</p>
+        <label class="campo" for="cHoras"><span>Horas paradas por mês por atraso de reacionamento</span><input id="cHoras" type="number" min="0" step="0.5" value="30" inputmode="decimal"></label>
+        <label class="campo" for="cCap"><span>Capacidade do britador (t/h)</span><input id="cCap" type="number" min="0" step="10" value="250" inputmode="decimal"></label>
+        <div class="resultado"><span class="counter" id="contador">90.000<small> t</small></span><span class="muted">de material que deixam de ser britadas por ano</span></div>
+        <p class="muted" style="font-size:14px">Valores iniciais de exemplo. Troque pelos números da sua planta.</p>
+      </div>
+    </div>
+    <div class="cards3">
+      <div class="card rv">
+        <svg aria-hidden="true" style="color:var(--ambar-txt)"><use href="#i-olho"/></svg>
+        <h3>Decisão manual</h3>
+        <p>O operador acompanha o nível pela câmera e decide ligar ou desligar o britador primário, de tempos em tempos, entre outras tarefas.</p>
+      </div>
+      <div class="card rv">
+        <svg aria-hidden="true" style="color:var(--ambar-txt)"><use href="#i-relogio"/></svg>
+        <h3>Cada atraso pesa</h3>
+        <p>Entre uma checagem e outra o equipamento seguinte esvazia, e o primário fica parado esperando o reacionamento.</p>
+      </div>
+      <div class="card escuro rv">
+        <svg aria-hidden="true" style="color:var(--ambar)"><use href="#i-alerta"/></svg>
+        <h3>Turnos sem cobertura</h3>
+        <p>Nos turnos sem operador dedicado ninguém toma essa decisão, e o potencial de britagem fica parado.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="demo">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">A plataforma ao vivo</p>
+      <h2 class="h2">Veja a Sismos decidindo em tempo real</h2>
+      <p class="lead">Simulação de um britador secundário alimentado pelo primário. A câmera mostra o nível de material, o modelo classifica cada leitura e a lógica de decisão comanda o britador primário. Ligue a poeira na lente para ver como a Sismos se comporta quando não tem certeza.</p>
+    </div>
+    <div class="demo">
+      <div class="panel cam">
+        <canvas id="cam" role="img" aria-label="Imagem simulada da câmera do britador secundário, com a região de leitura marcada"></canvas>
+        <div class="cam-foot">
+          <div class="ctrls" role="group" aria-label="Velocidade da simulação">
+            <button class="chip" id="v1" aria-pressed="true">1×</button>
+            <button class="chip" id="v5" aria-pressed="false">5×</button>
+          </div>
+          <div class="ctrls">
+            <button class="chip" id="poeira" aria-pressed="false">Poeira na lente</button>
+            <button class="chip" id="pausa" aria-pressed="false">Pausar</button>
+          </div>
+        </div>
+      </div>
+      <div class="side">
+        <div class="panel">
+          <p class="lbl">Britador primário</p>
+          <div class="estado"><b id="estadoTxt">Ligado</b><span class="pill on" id="estadoPill">ACIONADO</span></div>
+          <div class="conf" id="confBars">
+            <div class="mini-bar" data-c="vazio"><span>Vazio</span><span class="trk"><span class="fill" style="width:5%"></span></span><span>0,05</span></div>
+            <div class="mini-bar on" data-c="inter"><span>Intermediário</span><span class="trk"><span class="fill" style="width:90%"></span></span><span>0,90</span></div>
+            <div class="mini-bar" data-c="cheio"><span>Cheio</span><span class="trk"><span class="fill" style="width:5%"></span></span><span>0,05</span></div>
+          </div>
+          <div class="meta">
+            <div><b id="confirm">0/3</b><span>leituras de confirmação</span></div>
+            <div><b id="reacao">—</b><span>reação da Sismos ao último limite</span></div>
+            <div><b id="manual">4:00</b><span>até a próxima checagem manual</span></div>
+            <div><b id="leituras">0</b><span>leituras feitas</span></div>
+          </div>
+        </div>
+        <div class="panel">
+          <p class="lbl">Nível nos últimos 60 s</p>
+          <canvas class="strip" id="strip" role="img" aria-label="Gráfico do nível do britador secundário no último minuto, com as faixas de vazio e cheio e os comandos dados"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:20px;padding:22px">
+      <p class="lbl">Registro de decisões</p>
+      <ul class="log" id="log" aria-live="polite"></ul>
+    </div>
+    <p class="demo-note">Dados simulados para demonstração. No piloto, o modelo é treinado com imagens reais das câmeras da sua planta.</p>
+  </div>
+</section>
+
+<section class="band claro" id="como">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Como funciona</p>
+      <h2 class="h2">Da câmera ao CLP em cinco etapas</h2>
+      <p class="lead">Cada leitura percorre o mesmo caminho em poucos segundos, sem depender de alguém olhando a tela.</p>
+    </div>
+    <div class="pipe" id="pipe">
+      <div class="pipe-line" aria-hidden="true"></div>
+      <div class="step"><div class="num">01</div><h3>Câmeras existentes</h3><p>A Sismos captura frames das câmeras já instaladas sobre o equipamento.</p></div>
+      <div class="step"><div class="num">02</div><h3>Recorte</h3><p>Isola só a região onde o nível de material é lido, eliminando o resto da cena.</p></div>
+      <div class="step"><div class="num">03</div><h3>Classificação</h3><p>Uma rede neural leve define: cheio, intermediário ou vazio, com o grau de confiança.</p></div>
+      <div class="step"><div class="num">04</div><h3>Decisão</h3><p>Regras de confirmação e de segurança decidem se é hora de agir.</p></div>
+      <div class="step"><div class="num">05</div><h3>Comando</h3><p>Um sinal ao CLP aciona ou desaciona o britador primário.</p></div>
+    </div>
+    <div class="local">
+      <span class="tag">Sem obra</span>
+      <span class="tag">Sem sensor novo</span>
+      <span class="tag">Processamento local, sem nuvem</span>
+      <span class="tag">Integração com o CLP atual</span>
+    </div>
+  </div>
+</section>
+
+<section class="band escuro-2">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">A regra de decisão</p>
+      <h2 class="h2">Três leituras, uma regra simples</h2>
+      <p class="lead">A faixa intermediária funciona como margem de segurança: o britador só muda de estado quando o nível passa claramente para cheio ou vazio.</p>
+    </div>
+    <div class="regra">
+      <div class="rv"><p class="lbl">Vazio</p><h3>Aciona o primário</h3><p>O equipamento seguinte precisa de material.</p></div>
+      <div class="rv"><p class="lbl">Intermediário</p><h3>Mantém como está</h3><p>Evita liga e desliga desnecessário do motor.</p></div>
+      <div class="rv"><p class="lbl">Cheio</p><h3>Desaciona o primário</h3><p>Evita sobrecarga e transbordo.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band claro" id="implantacao">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Implantação</p>
+      <h2 class="h2">Três fases, sem risco para a operação</h2>
+      <p class="lead">Cada fase só avança quando a anterior comprovar resultado com dados da própria planta.</p>
+    </div>
+    <div class="fases">
+      <div class="fase rv"><span class="n">1</span><h3>Modo sombra</h3><p>A Sismos lê e registra o que faria. Comparamos com as decisões reais do operador.</p><span class="quem">Operador: decide como hoje</span></div>
+      <div class="fase rv"><span class="n">2</span><h3>Modo assistido</h3><p>A Sismos sugere a ação no momento certo e o operador confirma com um clique.</p><span class="quem">Operador: aprova</span></div>
+      <div class="fase escuro rv"><span class="n">3</span><h3>Modo automático</h3><p>A Sismos aciona e desaciona sozinha, inclusive no turno noturno.</p><span class="quem">Operador: supervisiona</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="seguranca">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Segurança</p>
+      <h2 class="h2">A operação continua no controle</h2>
+    </div>
+    <div class="seg">
+      <div class="item rv"><svg aria-hidden="true" style="color:var(--ambar)"><use href="#i-check"/></svg><div><h3>Confirmação no tempo</h3><p>Só age depois de três leituras seguidas iguais. Um frame isolado nunca dispara um comando.</p></div></div>
+      <div class="item rv"><svg aria-hidden="true" style="color:var(--ambar)"><use href="#i-relogio"/></svg><div><h3>Intervalo entre partidas</h3><p>Respeita o limite de partidas por hora do motor do britador primário.</p></div></div>
+      <div class="item rv"><svg aria-hidden="true" style="color:var(--ambar)"><use href="#i-alerta"/></svg><div><h3>Na dúvida, não age</h3><p>Poeira, lente suja ou pouca luz: a Sismos não comanda e alerta o operador.</p></div></div>
+      <div class="item rv"><svg aria-hidden="true" style="color:var(--ambar)"><use href="#i-cadeado"/></svg><div><h3>Intertravamentos intactos</h3><p>A segurança segue no CLP, e o operador pode assumir o comando a qualquer momento.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="band escuro-2">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Resultados esperados</p>
+      <h2 class="h2">O que sua operação ganha</h2>
+    </div>
+    <div class="res">
+      <div class="rv"><span class="lbl">Reação</span><b>Segundos</b><p>entre a leitura do nível e o comando, em vez de minutos esperando uma checagem manual.</p></div>
+      <div class="rv"><span class="lbl">Cobertura</span><b>24 h</b><p>por dia, incluindo turnos e horários que hoje ficam sem cobertura.</p></div>
+      <div class="rv"><span class="lbl">Implantação</span><b>Sem obra</b><p>usa as câmeras existentes e conversa com o CLP que a planta já tem.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band cta" id="contato">
+  <svg class="cta-mark" viewBox="0 0 96 96" aria-hidden="true" style="color:var(--carvao)"><use href="#simbolo"/></svg>
+  <div class="wrap">
+    <div style="min-width:0">
+      <p class="eyebrow">Próximo passo</p>
+      <h2>Leve a Sismos para a sua britagem.</h2>
+      <p class="lead">Começamos com um piloto em modo sombra em um ponto da sua planta, com o modelo treinado nas suas imagens e um painel de horas recuperadas.</p>
+    </div>
+    <form class="contato" id="formPiloto" novalidate>
+      <p class="lbl">Agendar piloto</p>
+      <label class="fcampo" for="fNome"><span>Nome</span><input id="fNome" name="nome" type="text" autocomplete="name" required placeholder="Seu nome"></label>
+      <label class="fcampo" for="fEmpresa"><span>Empresa</span><input id="fEmpresa" name="empresa" type="text" autocomplete="organization" required placeholder="Nome da empresa"></label>
+      <label class="fcampo" for="fFuncao"><span>Função na empresa</span><input id="fFuncao" name="funcao" type="text" autocomplete="organization-title" required placeholder="Ex.: gerente de operações"></label>
+      <p class="ferro" id="fErro" hidden>Preencha nome, empresa e função para continuar.</p>
+      <button class="btn btn-ambar fbtn" type="submit">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2c0 1.3.9 2.5 1 2.7.1.2 1.8 2.8 4.4 3.9 1.6.7 2.3.8 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3Z"/></svg>
+        Enviar pelo WhatsApp
+      </button>
+      <p class="precisa">Você será levado ao WhatsApp com seus dados já preenchidos na mensagem.</p>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span class="logo"><svg viewBox="0 0 96 96" aria-hidden="true" style="color:var(--ambar);width:26px;height:26px"><use href="#simbolo"/></svg><span class="wordmark" style="font-size:17px;color:var(--pedra)">S<span class="slash">I</span>SMOS</span></span>
+    <span>Menos espera. Mais britagem.</span>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const reduz = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const C = {carvao:css('--carvao'), linha:css('--linha'), pedra:css('--pedra'), ambar:css('--ambar'), aco:css('--aco'), alerta:css('--alerta'), txt:css('--txt-claro')};
+  const fmt = n => n.toFixed(2).replace('.', ',');
+
+  function fitCanvas(cv){
+    const r = cv.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2);
+    const w = Math.max(1, Math.round(r.width * d)), h = Math.max(1, Math.round(r.height * d));
+    if (cv.width !== w || cv.height !== h){ cv.width = w; cv.height = h; }
+    const ctx = cv.getContext('2d'); ctx.setTransform(d,0,0,d,0,0);
+    return {ctx, w:r.width, h:r.height};
+  }
+
+  /* ---------- reveal ---------- */
+  const rvs = [...document.querySelectorAll('.rv')];
+  if (!reduz && 'IntersectionObserver' in window){
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ e.target.classList.remove('pre'); io.unobserve(e.target); } }), {threshold:.15});
+    rvs.forEach((el,i) => { if (el.getBoundingClientRect().top > innerHeight){ el.classList.add('pre'); el.style.transitionDelay = (i%3)*90+'ms'; io.observe(el); } });
+  }
+
+  /* ---------- calculadora ---------- */
+  const cont = document.getElementById('contador'), cH = document.getElementById('cHoras'), cC = document.getElementById('cCap');
+  let mostrado = 90000, anim = 0;
+  function calcula(){
+    const h = Math.max(0, parseFloat(String(cH.value).replace(',', '.')) || 0);
+    const c = Math.max(0, parseFloat(String(cC.value).replace(',', '.')) || 0);
+    const alvo = h * 12 * c, de = mostrado, t0 = performance.now();
+    cancelAnimationFrame(anim);
+    const passo = t => { const p = reduz ? 1 : Math.min(1, (t - t0)/600), e = 1 - Math.pow(1-p, 3);
+      mostrado = de + (alvo - de)*e; cont.firstChild.nodeValue = Math.round(mostrado).toLocaleString('pt-BR');
+      if (p < 1) anim = requestAnimationFrame(passo); };
+    anim = requestAnimationFrame(passo);
+  }
+  cH.addEventListener('input', calcula); cC.addEventListener('input', calcula);
+
+
+  /* ---------- formulário → WhatsApp ---------- */
+  const form = document.getElementById('formPiloto');
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const campos = ['fNome','fEmpresa','fFuncao'].map(id => document.getElementById(id));
+    let ok = true;
+    campos.forEach(c => { const v = c.value.trim(); c.setAttribute('aria-invalid', v ? 'false' : 'true'); if (!v) ok = false; });
+    document.getElementById('fErro').hidden = ok;
+    if (!ok){ campos.find(c => !c.value.trim()).focus(); return; }
+    const [nome, empresa, funcao] = campos.map(c => c.value.trim());
+    const msg = 'Olá! Quero agendar um piloto da Sismos.\n\n*Nome:* ' + nome + '\n*Empresa:* ' + empresa + '\n*Função:* ' + funcao;
+    const a = document.createElement('a');
+    a.href = 'https://wa.me/5548991903121?text=' + encodeURIComponent(msg);
+    a.target = '_blank'; a.rel = 'noopener';
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+
+  /* ---------- pipeline ativo ---------- */
+  const steps = [...document.querySelectorAll('#pipe .step')];
+  let si = 0;
+  const marca = () => { steps.forEach((s,i)=>s.classList.toggle('ativo', i===si)); si=(si+1)%steps.length; };
+  marca(); if (!reduz) setInterval(marca, 1300);
+
+  /* ---------- sismógrafo do hero ---------- */
+  const sv = document.getElementById('seismo');
+  let fase = 0;
+  function sismo(){
+    const {ctx,w,h} = fitCanvas(sv);
+    ctx.clearRect(0,0,w,h);
+    const mid = h/2;
+    ctx.strokeStyle = C.linha; ctx.lineWidth = 1;
+    for (let x=0; x<w; x+=48){ ctx.beginPath(); ctx.moveTo(x,10); ctx.lineTo(x,h-10); ctx.stroke(); }
+    ctx.beginPath(); ctx.strokeStyle = C.ambar; ctx.lineWidth = 2.5; ctx.lineJoin='round';
+    const burstX = (fase*120) % (w+600) - 300;
+    for (let x=0; x<=w; x+=3){
+      const d = x - burstX;
+      const env = Math.exp(-(d*d)/(2*140*140));
+      const amp = env * (h*0.42) * (0.55 + 0.45*Math.sin(x*0.013 + fase));
+      const y = mid + Math.sin(x*0.19 + fase*7) * amp * Math.sin(x*0.051) + Math.sin(x*0.6+fase*3)*1.2;
+      x===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    }
+    ctx.globalAlpha = .85; ctx.stroke(); ctx.globalAlpha = 1;
+  }
+
+  /* ---------- simulação ---------- */
+  const S = {t:0, nivel:.46, ligado:true, poeira:false, vel:1, pausa:false,
+    buf:[], cmds:[], seq:{c:null,n:0}, ultimaPartida:-999, probs:{vazio:.05,inter:.9,cheio:.05}, classe:'inter',
+    invalido:false, cruzou:null, reacao:null, manual:240, leituras:0, prox:1, rochas:[], fluxo:[]};
+  const LIM_V = .25, LIM_C = .78, CONFIRMA = 3, GAP = 12;
+  for (let i=0;i<70;i++) S.rochas.push({x:Math.random(), y:Math.random(), r:1+Math.random()*3.2, g:40+Math.random()*50});
+  const nomes = {vazio:'Vazio', inter:'Intermediário', cheio:'Cheio'};
+  const relogio = t => { const base = 14*3600 + 2*60; const s = Math.floor(base + t);
+    return [Math.floor(s/3600)%24, Math.floor(s/60)%60, s%60].map(v=>String(v).padStart(2,'0')).join(':'); };
+
+  const logEl = document.getElementById('log');
+  function registra(txt, tipo){
+    const li = document.createElement('li'); if (tipo) li.className = tipo;
+    li.innerHTML = '<time>'+relogio(S.t)+'</time><span></span>'; li.lastChild.textContent = txt;
+    logEl.prepend(li); while (logEl.children.length > 6) logEl.lastChild.remove();
+  }
+
+  function leitura(){
+    S.leituras++;
+    const centros = {vazio:.1, inter:.5, cheio:.9};
+    let sc = {}, soma = 0;
+    for (const k in centros){ const d = (S.nivel - centros[k])/.13; sc[k] = Math.exp(-d*d) + .02 + Math.random()*.04; }
+    if (S.poeira) for (const k in sc) sc[k] = sc[k]*.12 + .5 + Math.random()*.12;
+    for (const k in sc) soma += sc[k];
+    for (const k in sc) S.probs[k] = sc[k]/soma;
+    let best = 'inter'; for (const k in S.probs) if (S.probs[k] > S.probs[best]) best = k;
+    const conf = S.probs[best];
+    const eraInvalido = S.invalido;
+    S.invalido = conf < .45;
+    if (S.invalido){
+      S.seq = {c:null,n:0};
+      if (!eraInvalido) registra('Imagem inválida (confiança '+fmt(conf)+') · sem ação, operador alertado', 'alerta');
+      return;
+    }
+    if (eraInvalido) registra('Imagem normalizada · leitura retomada');
+    S.classe = best;
+    S.seq = (S.seq.c === best) ? {c:best, n:S.seq.n+1} : {c:best, n:1};
+    if (best==='vazio' && !S.ligado){
+      if (S.seq.n >= CONFIRMA){
+        if (S.t - S.ultimaPartida >= GAP){
+          S.ligado = true; S.ultimaPartida = S.t; S.cmds.push({t:S.t, on:true});
+          if (S.cruzou!==null){ S.reacao = S.t - S.cruzou; S.cruzou = null; }
+          registra('Vazio confirmado '+CONFIRMA+'/'+CONFIRMA+' → primário ACIONADO', 'acao');
+        } else if (S.seq.n === CONFIRMA) registra('Vazio confirmado · aguardando intervalo mínimo entre partidas');
+      } else if (S.seq.n === 1) registra('Vazio detectado · confirmando');
+    }
+    if (best==='cheio' && S.ligado){
+      if (S.seq.n >= CONFIRMA){
+        S.ligado = false; S.cmds.push({t:S.t, on:false});
+        if (S.cruzou!==null){ S.reacao = S.t - S.cruzou; S.cruzou = null; }
+        registra('Cheio confirmado '+CONFIRMA+'/'+CONFIRMA+' → primário DESACIONADO', 'acao');
+      } else if (S.seq.n === 1) registra('Cheio detectado · confirmando');
+    }
+  }
+
+  function passo(dt){
+    S.t += dt;
+    const ruido = (Math.random()-.5)*.004;
+    S.nivel += (S.ligado ? .042 : -.03)*dt + ruido;
+    S.nivel = Math.max(.02, Math.min(.98, S.nivel));
+    if (S.cruzou===null && ((!S.ligado && S.nivel < LIM_V) || (S.ligado && S.nivel > LIM_C))) S.cruzou = S.t;
+    S.manual -= dt; if (S.manual <= 0) S.manual += 240;
+    S.prox -= dt; while (S.prox <= 0){ S.prox += 1; leitura(); }
+    S.buf.push({t:S.t, n:S.nivel});
+    while (S.buf.length && S.buf[0].t < S.t - 62) S.buf.shift();
+    while (S.cmds.length && S.cmds[0].t < S.t - 62) S.cmds.shift();
+  }
+
+  /* câmera */
+  const cam = document.getElementById('cam');
+  function desenhaCam(){
+    const {ctx,w,h} = fitCanvas(cam);
+    const g = ctx.createLinearGradient(0,0,0,h); g.addColorStop(0,'#2B302E'); g.addColorStop(1,'#1A1D1C');
+    ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
+    const topo = h*.17, base = h*.86, cx = w*.5, lt = w*.29, lb = w*.085;
+    const larg = y => lb + (lt-lb)*((base-y)/(base-topo));
+    ctx.save();
+    if (S.poeira) ctx.filter = 'blur(3px)';
+    // estrutura
+    ctx.fillStyle = '#3A403D'; ctx.fillRect(cx-lt-26, topo-18, (lt+26)*2, 12);
+    ctx.fillRect(cx-lb-8, base, (lb+8)*2, h-base);
+    // material
+    const yN = base - S.nivel*(base-topo);
+    ctx.beginPath(); ctx.moveTo(cx-lb, base);
+    const lN = larg(yN), passos = 22;
+    ctx.lineTo(cx-lN, yN);
+    for (let i=1;i<passos;i++){ const x = cx-lN + (2*lN)*i/passos; const y = yN + Math.sin(i*1.7 + S.t*.6)*5 + Math.sin(i*3.1)*3 - Math.sin(Math.PI*i/passos)*10; ctx.lineTo(x,y); }
+    ctx.lineTo(cx+lN, yN); ctx.lineTo(cx+lb, base); ctx.closePath();
+    const gm = ctx.createLinearGradient(0,yN,0,base); gm.addColorStop(0,'#6A6F6B'); gm.addColorStop(1,'#3E4240');
+    ctx.fillStyle = gm; ctx.fill();
+    ctx.save(); ctx.clip();
+    S.rochas.forEach(r => { const y = topo + r.y*(base-topo); const x = cx + (r.x-.5)*2*larg(y); ctx.fillStyle = 'rgb('+r.g+','+(r.g+3)+','+(r.g+1)+')'; ctx.beginPath(); ctx.arc(x,y,r.r,0,7); ctx.fill(); });
+    ctx.restore();
+    // paredes
+    ctx.strokeStyle = '#A9AFAB'; ctx.lineWidth = 4; ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.moveTo(cx-lt, topo); ctx.lineTo(cx-lb, base); ctx.lineTo(cx+lb, base); ctx.lineTo(cx+lt, topo); ctx.stroke();
+    // queda de material quando o primário está ligado
+    if (S.ligado){
+      if (S.fluxo.length < 40) S.fluxo.push({x:(Math.random()-.5)*w*.08, y:0, v:.6+Math.random()*.6, r:1.5+Math.random()*2.5});
+    }
+    S.fluxo.forEach(p => { p.y += p.v*6; });
+    S.fluxo = S.fluxo.filter(p => p.y < (yN - h*.06) && (S.ligado || p.y > 0));
+    ctx.fillStyle = '#7C817D';
+    S.fluxo.forEach(p => { ctx.beginPath(); ctx.arc(cx + p.x + w*.05, h*.04 + p.y, p.r, 0, 7); ctx.fill(); });
+    if (S.poeira){ ctx.fillStyle = 'rgba(150,122,86,.42)'; ctx.fillRect(0,0,w,h); }
+    ctx.restore();
+    // granulado
+    ctx.fillStyle = 'rgba(255,255,255,.05)';
+    for (let i=0;i<220;i++) ctx.fillRect(Math.random()*w, Math.random()*h, 1, 1);
+    // ROI e faixas
+    const rx = cx-lt-14, ry = topo-6, rw = (lt+14)*2, rh = base-topo+12;
+    ctx.setLineDash([8,6]); ctx.lineWidth = 2; ctx.strokeStyle = S.invalido ? C.alerta : C.ambar;
+    ctx.strokeRect(rx, ry, rw, rh);
+    ctx.globalAlpha = .55; ctx.lineWidth = 1;
+    [LIM_V, LIM_C].forEach(l => { const y = base - l*(base-topo); ctx.beginPath(); ctx.moveTo(rx, y); ctx.lineTo(rx+rw, y); ctx.stroke(); });
+    ctx.globalAlpha = 1; ctx.setLineDash([]);
+    // textos
+    const fs = Math.max(10, Math.min(13, w/48));
+    ctx.font = '500 '+fs+'px "IBM Plex Mono", monospace'; ctx.textBaseline = 'top';
+    ctx.fillStyle = 'rgba(242,239,232,.85)'; ctx.fillText('CAM 02 · BRITADOR SECUNDÁRIO', 14, 14);
+    const hora = relogio(S.t); const tw = ctx.measureText(hora).width;
+    ctx.fillText(hora, w - tw - 14, 14);
+    ctx.fillStyle = '#E5484D'; if (Math.floor(S.t*2)%2===0){ ctx.beginPath(); ctx.arc(w - tw - 26, 14+fs/2, 4, 0, 7); ctx.fill(); }
+    ctx.fillStyle = 'rgba(242,239,232,.6)';
+    ctx.fillText('CHEIO', rx + rw + 8 > w - 60 ? rx + 6 : rx + rw + 8, base - LIM_C*(base-topo) - fs - 4);
+    ctx.fillText('VAZIO', rx + rw + 8 > w - 60 ? rx + 6 : rx + rw + 8, base - LIM_V*(base-topo) + 4);
+    // etiqueta de classificação
+    const conf = Math.max(S.probs.vazio, S.probs.inter, S.probs.cheio);
+    const etq = S.invalido ? 'IMAGEM INVÁLIDA · '+fmt(conf) : nomes[S.classe].toUpperCase()+' · '+fmt(conf);
+    ctx.font = '600 '+(fs+1)+'px "IBM Plex Mono", monospace';
+    const ew = ctx.measureText(etq).width + 18;
+    ctx.fillStyle = S.invalido ? C.alerta : C.ambar; ctx.fillRect(rx, ry - fs - 16, ew, fs + 12);
+    ctx.fillStyle = C.carvao; ctx.fillText(etq, rx + 9, ry - fs - 10);
+  }
+
+  /* gráfico */
+  const strip = document.getElementById('strip');
+  function desenhaStrip(){
+    const {ctx,w,h} = fitCanvas(strip);
+    ctx.clearRect(0,0,w,h);
+    const padL = 48, padR = 8, padT = 8, padB = 22, pw = w-padL-padR, ph = h-padT-padB;
+    const X = t => padL + pw * (1 - (S.t - t)/60), Y = n => padT + ph*(1-n);
+    ctx.font = '11px "IBM Plex Mono", monospace'; ctx.fillStyle = C.txt; ctx.textBaseline = 'middle';
+    ctx.strokeStyle = C.linha; ctx.lineWidth = 1;
+    [0,.5,1].forEach(n => { ctx.beginPath(); ctx.moveTo(padL, Y(n)); ctx.lineTo(padL+pw, Y(n)); ctx.stroke(); });
+    ctx.setLineDash([5,5]); ctx.strokeStyle = C.ambar; ctx.globalAlpha = .6;
+    [LIM_V, LIM_C].forEach(n => { ctx.beginPath(); ctx.moveTo(padL, Y(n)); ctx.lineTo(padL+pw, Y(n)); ctx.stroke(); });
+    ctx.setLineDash([]); ctx.globalAlpha = 1;
+    ctx.fillText('cheio', 4, Y(LIM_C)); ctx.fillText('vazio', 4, Y(LIM_V));
+    ctx.textBaseline = 'top'; ctx.fillText('−60 s', padL, h-16);
+    const ag = 'agora'; ctx.fillText(ag, padL+pw-ctx.measureText(ag).width, h-16);
+    if (S.buf.length > 1){
+      const grad = ctx.createLinearGradient(0,padT,0,padT+ph); grad.addColorStop(0,'rgba(232,163,61,.28)'); grad.addColorStop(1,'rgba(232,163,61,0)');
+      ctx.beginPath(); ctx.moveTo(Math.max(padL, X(S.buf[0].t)), Y(0));
+      S.buf.forEach(p => ctx.lineTo(Math.max(padL, X(p.t)), Y(p.n)));
+      ctx.lineTo(X(S.buf[S.buf.length-1].t), Y(0)); ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
+      ctx.beginPath(); S.buf.forEach((p,i) => { const x = Math.max(padL, X(p.t)); i ? ctx.lineTo(x, Y(p.n)) : ctx.moveTo(x, Y(p.n)); });
+      ctx.strokeStyle = C.pedra; ctx.lineWidth = 2; ctx.stroke();
+      const u = S.buf[S.buf.length-1]; ctx.fillStyle = C.pedra; ctx.beginPath(); ctx.arc(X(u.t), Y(u.n), 4, 0, 7); ctx.fill();
+    }
+    S.cmds.forEach(c => { const x = X(c.t); if (x < padL) return; ctx.strokeStyle = C.ambar; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT+ph); ctx.stroke();
+      ctx.fillStyle = C.ambar; ctx.beginPath(); ctx.arc(x, padT+4, 4, 0, 7); ctx.fill(); });
+  }
+
+  /* painéis */
+  const $ = id => document.getElementById(id);
+  function barras(root){
+    root.querySelectorAll('.mini-bar').forEach(b => { const k = b.dataset.c, p = S.probs[k];
+      b.querySelector('.fill').style.width = (p*100).toFixed(0)+'%'; b.lastElementChild.textContent = fmt(p);
+      b.classList.toggle('on', !S.invalido && k===S.classe); });
+  }
+  function painel(){
+    barras($('confBars')); barras($('hcBars'));
+    $('estadoTxt').textContent = S.ligado ? 'Ligado' : 'Desligado';
+    const pill = $('estadoPill');
+    if (S.invalido){ pill.className = 'pill alert'; pill.textContent = 'OPERADOR ALERTADO'; }
+    else { pill.className = 'pill ' + (S.ligado ? 'on' : 'off'); pill.textContent = S.ligado ? 'ACIONADO' : 'DESACIONADO'; }
+    const alvo = (S.seq.c==='vazio' && !S.ligado) || (S.seq.c==='cheio' && S.ligado);
+    $('confirm').textContent = (alvo ? Math.min(S.seq.n, CONFIRMA) : 0) + '/' + CONFIRMA;
+    $('reacao').textContent = S.reacao===null ? '—' : S.reacao.toFixed(0)+' s';
+    const m = Math.ceil(S.manual); $('manual').textContent = Math.floor(m/60)+':'+String(m%60).padStart(2,'0');
+    $('leituras').textContent = S.leituras.toLocaleString('pt-BR');
+    $('hcClasse').textContent = S.invalido ? 'Imagem inválida' : nomes[S.classe];
+    $('hcPrim').textContent = S.ligado ? 'LIGADO' : 'DESLIGADO';
+    $('hcPrim').style.color = S.ligado ? C.ambar : C.txt;
+  }
+
+  /* controles */
+  const setVel = v => { S.vel = v; $('v1').setAttribute('aria-pressed', v===1); $('v5').setAttribute('aria-pressed', v===5); };
+  $('v1').onclick = () => setVel(1); $('v5').onclick = () => setVel(5);
+  $('poeira').onclick = e => { S.poeira = !S.poeira; e.currentTarget.setAttribute('aria-pressed', S.poeira); };
+  $('pausa').onclick = e => { S.pausa = !S.pausa; e.currentTarget.setAttribute('aria-pressed', S.pausa); e.currentTarget.textContent = S.pausa ? 'Continuar' : 'Pausar'; };
+
+  // aquece a simulação para abrir com histórico no gráfico e no registro
+  registra('Sismos iniciada · lendo CAM 02 a cada 1 s');
+  for (let i=0;i<600;i++) passo(.1);
+
+  let ult = performance.now(), acc = 0;
+  function loop(agora){
+    const dt = Math.min(.1, (agora - ult)/1000); ult = agora;
+    if (!S.pausa){ acc += dt*S.vel; while (acc >= .05){ passo(.05); acc -= .05; } }
+    fase += dt*1.2;
+    sismo(); desenhaCam(); desenhaStrip(); painel();
+    requestAnimationFrame(loop);
+  }
+  if (reduz){ sismo(); desenhaCam(); desenhaStrip(); painel();
+    setInterval(() => { if (!S.pausa){ for (let i=0;i<10*S.vel;i++) passo(.1); } desenhaCam(); desenhaStrip(); painel(); }, 1000);
+    addEventListener('resize', () => { sismo(); });
+  } else requestAnimationFrame(loop);
+})();
+</script>
+
+</body>
+</html>
