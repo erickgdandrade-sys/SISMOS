@@ -8,7 +8,9 @@ Visão computacional que lê o nível de material nas câmeras que a planta já 
 
 Um site estático de página única (`index.html`), sem build e sem dependências:
 
-- Demonstração ao vivo: câmera simulada, classificação cheio / intermediário / vazio, confirmação por leituras seguidas e comando do britador primário
+- Por que a câmera de cima funciona: o nível aparece como área de pedra na boca da tremonha
+- Demonstração ao vivo: câmera simulada vista de cima, percentual de ocupação, tendência, atraso da correia, confirmação por leituras seguidas e comando do britador primário
+- Explicação do atraso da correia e de como a Sismos mede e antecipa
 - Calculadora de perda de britagem por atraso de reacionamento
 - Formulário "Agendar piloto" que abre o WhatsApp com os dados preenchidos
 

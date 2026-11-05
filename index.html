@@ -69,7 +69,7 @@ a{color:inherit}
 .hero-ctas{display:flex;flex-wrap:wrap;gap:14px;margin-top:36px}
 .hero-card{background:var(--painel);border:1px solid var(--linha);border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:14px;min-width:0}
 .hero-card .row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-family:var(--f-mono);font-size:13px;color:var(--txt-claro);letter-spacing:.06em}
-.hero-card .big{font-family:var(--f-display);font-size:44px;font-weight:700;line-height:1;color:var(--pedra)}
+.hero-card .big{font-family:var(--f-display);font-size:34px;font-weight:700;line-height:1;color:var(--pedra)}
 .hero-card .live{display:inline-flex;align-items:center;gap:8px;color:var(--ambar)}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--ambar);animation:pulso 1.4s ease-in-out infinite}
 @keyframes pulso{50%{opacity:.25}}
@@ -117,11 +117,29 @@ a{color:inherit}
 .fcampo input[aria-invalid="true"]{border-color:var(--alerta)}
 .ferro{font-size:14px;color:var(--alerta)}
 .fbtn{justify-content:center;width:100%;padding:14px 20px;font-size:17px}
+/* ---------- vista de cima ---------- */
+.vista{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.vista figure{margin:0;display:flex;flex-direction:column;gap:12px;min-width:0}
+.vista svg{width:100%;height:auto;border-radius:14px;display:block}
+.vista .lbl{color:var(--ambar)}
+.vista b{font-family:var(--f-display);font-size:30px;font-weight:700;line-height:1.1}
+.vista p{color:var(--txt-claro);font-size:16px}
+.vista-nota{margin-top:28px;font-size:18px;color:var(--txt-claro-2);max-width:70ch}
+@media (max-width:820px){.vista{grid-template-columns:1fr}}
+/* ---------- atraso ---------- */
+.atraso{display:grid;grid-template-columns:1.3fr 1fr;gap:56px;align-items:center}
+.atraso svg{width:100%;height:auto;display:block}
+.atraso ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:28px}
+.atraso li{display:grid;grid-template-columns:44px 1fr;gap:16px;font-size:19px;line-height:1.45}
+.atraso li span{font-family:var(--f-display);font-size:36px;font-weight:700;line-height:1;color:var(--ambar-txt)}
+@media (max-width:900px){.atraso{grid-template-columns:1fr}}
+.invalida{margin-top:24px;display:flex;gap:18px;align-items:center;background:var(--painel);border:1px solid var(--linha);border-radius:16px;padding:20px 24px;color:var(--txt-claro-2)}
+.invalida svg{width:32px;height:32px;flex:none;color:var(--alerta)}
 /* ---------- demo ---------- */
 .demo{display:grid;grid-template-columns:1.35fr 1fr;gap:20px}
 .panel{background:var(--painel);border:1px solid var(--linha);border-radius:18px;min-width:0}
 .cam{position:relative;overflow:hidden;padding:0}
-.cam canvas{display:block;width:100%;aspect-ratio:16/11;border-radius:18px 18px 0 0}
+.cam canvas{display:block;width:100%;aspect-ratio:10/9;border-radius:18px 18px 0 0}
 .cam-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;border-top:1px solid var(--linha)}
 .ctrls{display:flex;flex-wrap:wrap;gap:8px}
 .chip{font-family:var(--f-mono);font-size:13px;letter-spacing:.04em;padding:8px 12px;border-radius:8px;border:1px solid var(--linha);background:transparent;color:var(--txt-claro);cursor:pointer;transition:all .2s}
@@ -138,7 +156,7 @@ a{color:inherit}
 .pill.alert{border-color:var(--alerta);color:var(--alerta)}
 .conf{display:flex;flex-direction:column;gap:10px;margin-top:16px}
 .conf .mini-bar{grid-template-columns:120px 1fr 44px;font-size:14px}
-.meta{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;padding-top:18px;border-top:1px solid var(--linha)}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:16px 14px;margin-top:18px;padding-top:18px;border-top:1px solid var(--linha)}
 .meta div{display:flex;flex-direction:column;gap:4px}
 .meta b{font-family:var(--f-display);font-size:24px;font-weight:600;font-variant-numeric:tabular-nums}
 .meta span{font-size:13px;color:var(--txt-claro)}
@@ -334,16 +352,32 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;align-ite
   </div>
 </section>
 
+<section class="band escuro-2" id="vista">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Por que a câmera de cima funciona</p>
+      <h2 class="h2">De cima, o nível aparece como área</h2>
+      <p class="lead">A tremonha que alimenta o britador é um funil, estreito embaixo e largo em cima. Quanto mais alto o material, maior a área de pedra que a câmera vê. A Sismos mede essa área, que é a mesma coisa que o operador avalia hoje olhando a tela.</p>
+    </div>
+    <div class="vista">
+      <figure class="rv"><svg viewBox="0 0 400 300" role="img" aria-label="Tremonha vista de cima, vazia: paredes visíveis e pouca pedra no centro"><rect x="0" y="0" width="400" height="300" fill="#2B302E"/><rect x="30" y="20" width="340" height="260" rx="6" fill="#6E736F"/><rect x="44" y="34" width="312" height="232" fill="#4A4F4C"/><polygon points="44,34 356,34 260,100 140,100" fill="#5C615E"/><polygon points="44,266 356,266 260,200 140,200" fill="#434845"/><polygon points="44,34 140,100 140,200 44,266" fill="#515653"/><polygon points="356,34 260,100 260,200 356,266" fill="#575C59"/><rect x="140" y="100" width="120" height="100" fill="#2A2E2D"/><circle cx="200" cy="150" r="34" fill="#3B403E" stroke="#6E736F" stroke-width="2"/><polygon points="160,128 178,112 205,116 228,110 244,132 240,160 248,178 222,192 196,186 172,194 156,172 162,150" fill="#71766F"/><circle cx="185" cy="135" r="7" fill="#858A85"/><circle cx="215" cy="160" r="9" fill="#5A5F5B"/><circle cx="200" cy="178" r="6" fill="#8E938D"/><circle cx="228" cy="130" r="6" fill="#858A85"/><polygon points="160,128 178,112 205,116 228,110 244,132 240,160 248,178 222,192 196,186 172,194 156,172 162,150" fill="none" stroke="#E8A33D" stroke-width="3" stroke-dasharray="8 5"/></svg><span class="lbl">Vazio</span><b>~10% coberto</b><p>Paredes do funil à vista e o fundo aparecendo.</p></figure>
+      <figure class="rv"><svg viewBox="0 0 400 300" role="img" aria-label="Tremonha vista de cima, nível intermediário: ilha de pedra no centro com faixa de parede em volta"><rect x="0" y="0" width="400" height="300" fill="#2B302E"/><rect x="30" y="20" width="340" height="260" rx="6" fill="#6E736F"/><rect x="44" y="34" width="312" height="232" fill="#4A4F4C"/><polygon points="44,34 356,34 260,100 140,100" fill="#5C615E"/><polygon points="44,266 356,266 260,200 140,200" fill="#434845"/><polygon points="44,34 140,100 140,200 44,266" fill="#515653"/><polygon points="356,34 260,100 260,200 356,266" fill="#575C59"/><rect x="140" y="100" width="120" height="100" fill="#2A2E2D"/><circle cx="200" cy="150" r="34" fill="#3B403E" stroke="#6E736F" stroke-width="2"/><polygon points="102,92 140,70 180,78 214,64 252,74 290,86 300,120 292,150 306,182 284,214 246,222 210,234 172,226 134,230 104,204 96,170 108,138" fill="#71766F"/><circle cx="140" cy="110" r="9" fill="#858A85"/><circle cx="180" cy="96" r="7" fill="#5A5F5B"/><circle cx="235" cy="100" r="10" fill="#8E938D"/><circle cx="270" cy="140" r="8" fill="#858A85"/><circle cx="205" cy="150" r="11" fill="#5A5F5B"/><circle cx="150" cy="180" r="9" fill="#8E938D"/><circle cx="250" cy="195" r="9" fill="#858A85"/><circle cx="190" cy="205" r="7" fill="#5A5F5B"/><circle cx="125" cy="150" r="6" fill="#8E938D"/><polygon points="102,92 140,70 180,78 214,64 252,74 290,86 300,120 292,150 306,182 284,214 246,222 210,234 172,226 134,230 104,204 96,170 108,138" fill="none" stroke="#E8A33D" stroke-width="3" stroke-dasharray="8 5"/></svg><span class="lbl">Intermediário</span><b>~55% coberto</b><p>Uma ilha de pedra com faixa de parede em volta.</p></figure>
+      <figure class="rv"><svg viewBox="0 0 400 300" role="img" aria-label="Tremonha vista de cima, cheia: pedra cobrindo toda a boca"><rect x="0" y="0" width="400" height="300" fill="#2B302E"/><rect x="30" y="20" width="340" height="260" rx="6" fill="#6E736F"/><polygon points="40,30 90,24 140,32 190,22 240,30 290,22 340,30 362,40 366,90 360,140 368,190 362,240 356,272 310,280 260,272 210,282 160,274 110,282 60,274 38,262 34,210 40,160 32,110 38,60" fill="#71766F"/><circle cx="80" cy="60" r="10" fill="#858A85"/><circle cx="140" cy="80" r="8" fill="#5A5F5B"/><circle cx="210" cy="60" r="11" fill="#8E938D"/><circle cx="290" cy="70" r="9" fill="#858A85"/><circle cx="330" cy="120" r="10" fill="#5A5F5B"/><circle cx="260" cy="130" r="8" fill="#8E938D"/><circle cx="190" cy="140" r="12" fill="#858A85"/><circle cx="110" cy="140" r="9" fill="#5A5F5B"/><circle cx="70" cy="200" r="10" fill="#8E938D"/><circle cx="150" cy="210" r="8" fill="#858A85"/><circle cx="230" cy="200" r="11" fill="#5A5F5B"/><circle cx="310" cy="210" r="9" fill="#8E938D"/><circle cx="120" cy="250" r="7" fill="#858A85"/><circle cx="270" cy="250" r="8" fill="#5A5F5B"/><polygon points="40,30 90,24 140,32 190,22 240,30 290,22 340,30 362,40 366,90 360,140 368,190 362,240 356,272 310,280 260,272 210,282 160,274 110,282 60,274 38,262 34,210 40,160 32,110 38,60" fill="none" stroke="#E8A33D" stroke-width="3" stroke-dasharray="8 5"/></svg><span class="lbl">Cheio</span><b>~100% coberto</b><p>Pedra tomando toda a boca, sem parede à vista.</p></figure>
+    </div>
+    <p class="vista-nota">O contorno âmbar é o que o modelo separa como pedra. Dele saem duas leituras: a classe do nível e o percentual da boca coberta. Ilustração esquemática.</p>
+  </div>
+</section>
+
 <section class="band" id="demo">
   <div class="wrap">
     <div class="sec-head">
       <p class="eyebrow">A plataforma ao vivo</p>
       <h2 class="h2">Veja a Sismos decidindo em tempo real</h2>
-      <p class="lead">Simulação de um britador secundário alimentado pelo primário. A câmera mostra o nível de material, o modelo classifica cada leitura e a lógica de decisão comanda o britador primário. Ligue a poeira na lente para ver como a Sismos se comporta quando não tem certeza.</p>
+      <p class="lead">Simulação da câmera vista de cima, sobre a tremonha de um britador secundário. A Sismos mede quanto da boca está coberto por pedra, acompanha a tendência e liga ou desliga o britador primário antes de esvaziar ou transbordar, já descontando o atraso da correia. Ligue a poeira na lente para ver como ela se comporta quando não tem certeza.</p>
     </div>
     <div class="demo">
       <div class="panel cam">
-        <canvas id="cam" role="img" aria-label="Imagem simulada da câmera do britador secundário, com a região de leitura marcada"></canvas>
+        <canvas id="cam" role="img" aria-label="Imagem simulada da câmera vista de cima, com a área de pedra contornada e a região de leitura marcada"></canvas>
         <div class="cam-foot">
           <div class="ctrls" role="group" aria-label="Velocidade da simulação">
             <button class="chip" id="v1" aria-pressed="true">1×</button>
@@ -365,8 +399,10 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;align-ite
             <div class="mini-bar" data-c="cheio"><span>Cheio</span><span class="trk"><span class="fill" style="width:5%"></span></span><span>0,05</span></div>
           </div>
           <div class="meta">
+            <div><b id="ocup">58%</b><span>da boca coberta por pedra</span></div>
+            <div><b id="tend">—</b><span>tendência do nível</span></div>
             <div><b id="confirm">0/3</b><span>leituras de confirmação</span></div>
-            <div><b id="reacao">—</b><span>reação da Sismos ao último limite</span></div>
+            <div><b id="atrasoTxt">5 s</b><span>atraso da correia, medido</span></div>
             <div><b id="manual">4:00</b><span>até a próxima checagem manual</span></div>
             <div><b id="leituras">0</b><span>leituras feitas</span></div>
           </div>
@@ -389,16 +425,16 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;align-ite
   <div class="wrap">
     <div class="sec-head">
       <p class="eyebrow">Como funciona</p>
-      <h2 class="h2">Da câmera ao CLP em cinco etapas</h2>
+      <h2 class="h2">Da câmera à decisão em cinco etapas</h2>
       <p class="lead">Cada leitura percorre o mesmo caminho em poucos segundos, sem depender de alguém olhando a tela.</p>
     </div>
     <div class="pipe" id="pipe">
       <div class="pipe-line" aria-hidden="true"></div>
-      <div class="step"><div class="num">01</div><h3>Câmeras existentes</h3><p>A Sismos captura frames das câmeras já instaladas sobre o equipamento.</p></div>
-      <div class="step"><div class="num">02</div><h3>Recorte</h3><p>Isola só a região onde o nível de material é lido, eliminando o resto da cena.</p></div>
-      <div class="step"><div class="num">03</div><h3>Classificação</h3><p>Uma rede neural leve define: cheio, intermediário ou vazio, com o grau de confiança.</p></div>
-      <div class="step"><div class="num">04</div><h3>Decisão</h3><p>Regras de confirmação e de segurança decidem se é hora de agir.</p></div>
-      <div class="step"><div class="num">05</div><h3>Comando</h3><p>Um sinal ao CLP aciona ou desaciona o britador primário.</p></div>
+      <div class="step"><div class="num">01</div><h3>Câmera existente</h3><p>Imagem de cima da boca da tremonha, várias vezes por minuto.</p></div>
+      <div class="step"><div class="num">02</div><h3>Recorte</h3><p>Só a boca da tremonha entra na análise. O resto da cena é ignorado.</p></div>
+      <div class="step"><div class="num">03</div><h3>Leitura</h3><p>Uma rede neural leve dá a classe do nível e o percentual da boca coberta por pedra.</p></div>
+      <div class="step"><div class="num">04</div><h3>Filtro no tempo</h3><p>Mediana das leituras e tendência: o nível está subindo ou descendo, e em que ritmo.</p></div>
+      <div class="step"><div class="num">05</div><h3>Decisão</h3><p>Alerta na tela do operador ou comando ao CLP para ligar ou desligar o primário.</p></div>
     </div>
     <div class="local">
       <span class="tag">Sem obra</span>
@@ -409,18 +445,48 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;align-ite
   </div>
 </section>
 
+<section class="band claro" id="atraso" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">O atraso da correia</p>
+      <h2 class="h2">A correia tem atraso. A Sismos mede e antecipa.</h2>
+      <p class="lead">O material que já está na correia continua chegando depois que o primário desliga, e demora para chegar depois que ele liga. Quem espera ver “cheio” para desligar, transborda.</p>
+    </div>
+    <div class="atraso">
+      <svg viewBox="0 0 900 460" role="img" aria-label="Gráfico do nível no britador ao longo do tempo: o operador liga o primário e o nível só começa a subir depois de um intervalo, que é o atraso da correia" font-family="'IBM Plex Mono', monospace">
+        <line x1="60" y1="20" x2="60" y2="400" stroke="#8A949C" stroke-width="2"/><line x1="60" y1="400" x2="880" y2="400" stroke="#8A949C" stroke-width="2"/>
+        <line x1="60" y1="140" x2="880" y2="140" stroke="#96570A" stroke-width="2" stroke-dasharray="10 8"/>
+        <rect x="60" y="420" width="140" height="16" fill="#C9C3B6"/><rect x="200" y="420" width="680" height="16" fill="#E8A33D"/>
+        <line x1="200" y1="40" x2="200" y2="400" stroke="#96570A" stroke-width="2" stroke-dasharray="6 6"/><line x1="340" y1="40" x2="340" y2="400" stroke="#6B727A" stroke-width="2" stroke-dasharray="6 6"/>
+        <line x1="200" y1="56" x2="340" y2="56" stroke="#1E2328" stroke-width="3"/><line x1="200" y1="46" x2="200" y2="66" stroke="#1E2328" stroke-width="3"/><line x1="340" y1="46" x2="340" y2="66" stroke="#1E2328" stroke-width="3"/>
+        <path d="M60 330 L200 342 L340 348 C400 348 440 260 540 210 C640 160 760 136 880 128" fill="none" stroke="#1E2328" stroke-width="5" stroke-linecap="round"/><circle cx="340" cy="348" r="8" fill="#1E2328"/>
+        <text x="356" y="62" font-size="22" font-weight="500" fill="#1E2328">Δ = atraso da correia</text>
+        <text x="600" y="122" font-size="22" fill="#96570A">limite de cheio</text>
+        <text x="76" y="296" font-size="22" fill="#4B5259" font-family="'IBM Plex Sans', sans-serif">Nível no britador</text>
+        <text x="880" y="386" font-size="22" fill="#4B5259" text-anchor="end" font-family="'IBM Plex Sans', sans-serif">Primário ligado</text>
+      </svg>
+      <ol>
+        <li class="rv"><span>1</span><p>No modo sombra, a Sismos registra cada vez que o operador liga ou desliga o primário.</p></li>
+        <li class="rv"><span>2</span><p>Mede no próprio vídeo quanto tempo o nível leva para reagir. Esse é o tempo de trânsito na correia, sem ninguém precisar informar o comprimento dela.</p></li>
+        <li class="rv"><span>3</span><p>Passa a agir antes: <b>desliga antes de encher</b> e <b>liga antes de esvaziar</b>. Os limites saem do mesmo aprendizado.</p></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
 <section class="band escuro-2">
   <div class="wrap">
     <div class="sec-head">
       <p class="eyebrow">A regra de decisão</p>
-      <h2 class="h2">Três leituras, uma regra simples</h2>
-      <p class="lead">A faixa intermediária funciona como margem de segurança: o britador só muda de estado quando o nível passa claramente para cheio ou vazio.</p>
+      <h2 class="h2">Nível e tendência decidem juntos</h2>
+      <p class="lead">A faixa intermediária estável funciona como margem de segurança. A tendência entra para compensar o atraso da correia.</p>
     </div>
     <div class="regra">
-      <div class="rv"><p class="lbl">Vazio</p><h3>Aciona o primário</h3><p>O equipamento seguinte precisa de material.</p></div>
-      <div class="rv"><p class="lbl">Intermediário</p><h3>Mantém como está</h3><p>Evita liga e desliga desnecessário do motor.</p></div>
-      <div class="rv"><p class="lbl">Cheio</p><h3>Desaciona o primário</h3><p>Evita sobrecarga e transbordo.</p></div>
+      <div class="rv"><p class="lbl">Vazio</p><h3>Liga o primário</h3><p>Ou intermediário caindo rápido, com o primário parado: liga antes de esvaziar.</p></div>
+      <div class="rv"><p class="lbl">Intermediário estável</p><h3>Mantém como está</h3><p>Evita liga e desliga desnecessário do motor.</p></div>
+      <div class="rv"><p class="lbl">Cheio</p><h3>Desliga o primário</h3><p>Ou intermediário subindo rápido, com o primário ligado: desliga antes de transbordar.</p></div>
     </div>
+    <div class="invalida rv"><svg aria-hidden="true"><use href="#i-alerta"/></svg><p><b style="color:var(--pedra)">Imagem inválida</b> (poeira, pouca luz, lente suja): a Sismos não age e avisa o operador.</p></div>
   </div>
 </section>
 
@@ -428,13 +494,13 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;align-ite
   <div class="wrap">
     <div class="sec-head">
       <p class="eyebrow">Implantação</p>
-      <h2 class="h2">Três fases, sem risco para a operação</h2>
+      <h2 class="h2">Começa sem integração, termina no automático</h2>
       <p class="lead">Cada fase só avança quando a anterior comprovar resultado com dados da própria planta.</p>
     </div>
     <div class="fases">
-      <div class="fase rv"><span class="n">1</span><h3>Modo sombra</h3><p>A Sismos lê e registra o que faria. Comparamos com as decisões reais do operador.</p><span class="quem">Operador: decide como hoje</span></div>
+      <div class="fase rv"><span class="n">1</span><h3>Sombra + alerta</h3><p>A Sismos aprende os limites e o atraso da correia, e já avisa na tela, com som, quando a tremonha esvazia.</p><span class="quem">Sem integração com o CLP</span></div>
       <div class="fase rv"><span class="n">2</span><h3>Modo assistido</h3><p>A Sismos sugere a ação no momento certo e o operador confirma com um clique.</p><span class="quem">Operador: aprova</span></div>
-      <div class="fase escuro rv"><span class="n">3</span><h3>Modo automático</h3><p>A Sismos aciona e desaciona sozinha, inclusive no turno noturno.</p><span class="quem">Operador: supervisiona</span></div>
+      <div class="fase escuro rv"><span class="n">3</span><h3>Modo automático</h3><p>Comando direto ao CLP. A Sismos liga e desliga sozinha, inclusive nos turnos sem operador dedicado.</p><span class="quem">Operador: supervisiona</span></div>
     </div>
   </div>
 </section>
@@ -446,7 +512,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;align-ite
       <h2 class="h2">A operação continua no controle</h2>
     </div>
     <div class="seg">
-      <div class="item rv"><svg aria-hidden="true" style="color:var(--ambar)"><use href="#i-check"/></svg><div><h3>Confirmação no tempo</h3><p>Só age depois de três leituras seguidas iguais. Um frame isolado nunca dispara um comando.</p></div></div>
+      <div class="item rv"><svg aria-hidden="true" style="color:var(--ambar)"><use href="#i-check"/></svg><div><h3>Confirmação no tempo</h3><p>Usa a mediana de várias imagens e só age depois de três leituras seguidas iguais. Poeira na descarga ou material caindo do chute não disparam comando.</p></div></div>
       <div class="item rv"><svg aria-hidden="true" style="color:var(--ambar)"><use href="#i-relogio"/></svg><div><h3>Intervalo entre partidas</h3><p>Respeita o limite de partidas por hora do motor do britador primário.</p></div></div>
       <div class="item rv"><svg aria-hidden="true" style="color:var(--ambar)"><use href="#i-alerta"/></svg><div><h3>Na dúvida, não age</h3><p>Poeira, lente suja ou pouca luz: a Sismos não comanda e alerta o operador.</p></div></div>
       <div class="item rv"><svg aria-hidden="true" style="color:var(--ambar)"><use href="#i-cadeado"/></svg><div><h3>Intertravamentos intactos</h3><p>A segurança segue no CLP, e o operador pode assumir o comando a qualquer momento.</p></div></div>
@@ -582,13 +648,16 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;align-ite
 
   /* ---------- simulação ---------- */
   const S = {t:0, nivel:.46, ligado:true, poeira:false, vel:1, pausa:false,
-    buf:[], cmds:[], seq:{c:null,n:0}, ultimaPartida:-999, probs:{vazio:.05,inter:.9,cheio:.05}, classe:'inter',
-    invalido:false, cruzou:null, reacao:null, manual:240, leituras:0, prox:1, rochas:[], fluxo:[]};
-  const LIM_V = .25, LIM_C = .78, CONFIRMA = 3, GAP = 12;
-  for (let i=0;i<70;i++) S.rochas.push({x:Math.random(), y:Math.random(), r:1+Math.random()*3.2, g:40+Math.random()*50});
+    buf:[], cmds:[], hist:[{t:-999, on:true}], seq:{k:null,n:0}, probs:{vazio:.05,inter:.9,cheio:.05}, classe:'inter',
+    invalido:false, tend:0, manual:240, leituras:0, prox:1, rochas:[], jit:[], fluxo:[], ultimaPartida:-999};
+  const LIM_V = .25, LIM_C = .78, CONFIRMA = 3, GAP = 12, ATRASO = 5;
+  for (let i=0;i<90;i++) S.rochas.push({x:Math.random()*2-1, y:Math.random()*2-1, r:1.2+Math.random()*3.4, g:70+Math.random()*60});
+  for (let i=0;i<30;i++) S.jit.push(Math.random()*2-1);
   const nomes = {vazio:'Vazio', inter:'Intermediário', cheio:'Cheio'};
   const relogio = t => { const base = 14*3600 + 2*60; const s = Math.floor(base + t);
     return [Math.floor(s/3600)%24, Math.floor(s/60)%60, s%60].map(v=>String(v).padStart(2,'0')).join(':'); };
+  const estadoEm = t => { let on = S.hist[0].on; for (const h of S.hist){ if (h.t <= t) on = h.on; else break; } return on; };
+  const fmtTend = v => (v>0?'+':'') + Math.round(v) + '%/min';
 
   const logEl = document.getElementById('log');
   function registra(txt, tipo){
@@ -597,6 +666,11 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;align-ite
     logEl.prepend(li); while (logEl.children.length > 6) logEl.lastChild.remove();
   }
 
+  function comanda(on, motivo){
+    S.ligado = on; S.cmds.push({t:S.t, on}); S.hist.push({t:S.t, on});
+    if (on) S.ultimaPartida = S.t;
+    registra(motivo + ' → primário ' + (on ? 'ACIONADO' : 'DESACIONADO'), 'acao');
+  }
   function leitura(){
     S.leituras++;
     const centros = {vazio:.1, inter:.5, cheio:.9};
@@ -606,113 +680,109 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;align-ite
     for (const k in sc) soma += sc[k];
     for (const k in sc) S.probs[k] = sc[k]/soma;
     let best = 'inter'; for (const k in S.probs) if (S.probs[k] > S.probs[best]) best = k;
-    const conf = S.probs[best];
-    const eraInvalido = S.invalido;
-    S.invalido = conf < .45;
+    const conf = S.probs[best], eraInvalido = S.invalido;
+    S.invalido = conf < .41;
     if (S.invalido){
-      S.seq = {c:null,n:0};
+      S.seq = {k:null,n:0};
       if (!eraInvalido) registra('Imagem inválida (confiança '+fmt(conf)+') · sem ação, operador alertado', 'alerta');
       return;
     }
     if (eraInvalido) registra('Imagem normalizada · leitura retomada');
     S.classe = best;
-    S.seq = (S.seq.c === best) ? {c:best, n:S.seq.n+1} : {c:best, n:1};
-    if (best==='vazio' && !S.ligado){
-      if (S.seq.n >= CONFIRMA){
-        if (S.t - S.ultimaPartida >= GAP){
-          S.ligado = true; S.ultimaPartida = S.t; S.cmds.push({t:S.t, on:true});
-          if (S.cruzou!==null){ S.reacao = S.t - S.cruzou; S.cruzou = null; }
-          registra('Vazio confirmado '+CONFIRMA+'/'+CONFIRMA+' → primário ACIONADO', 'acao');
-        } else if (S.seq.n === CONFIRMA) registra('Vazio confirmado · aguardando intervalo mínimo entre partidas');
-      } else if (S.seq.n === 1) registra('Vazio detectado · confirmando');
-    }
-    if (best==='cheio' && S.ligado){
-      if (S.seq.n >= CONFIRMA){
-        S.ligado = false; S.cmds.push({t:S.t, on:false});
-        if (S.cruzou!==null){ S.reacao = S.t - S.cruzou; S.cruzou = null; }
-        registra('Cheio confirmado '+CONFIRMA+'/'+CONFIRMA+' → primário DESACIONADO', 'acao');
-      } else if (S.seq.n === 1) registra('Cheio detectado · confirmando');
+    const caindo = S.tend < -30, subindo = S.tend > 30;
+    let k = null, motivo = '';
+    if (!S.ligado && best==='vazio'){ k='liga'; motivo='Vazio confirmado'; }
+    else if (!S.ligado && best==='inter' && caindo && S.nivel < .38){ k='liga'; motivo='Intermediário caindo, atraso da correia descontado'; }
+    else if (S.ligado && best==='cheio'){ k='desliga'; motivo='Cheio confirmado'; }
+    else if (S.ligado && best==='inter' && subindo && S.nivel > .64){ k='desliga'; motivo='Intermediário subindo, atraso da correia descontado'; }
+    S.seq = (k && S.seq.k===k) ? {k, n:S.seq.n+1} : {k, n:k?1:0};
+    if (!k) return;
+    if (S.seq.n === 1) registra((k==='liga' ? 'Tendência de esvaziar' : 'Tendência de encher') + ' detectada · confirmando');
+    if (S.seq.n >= CONFIRMA){
+      if (k==='liga' && S.t - S.ultimaPartida < GAP){ if (S.seq.n === CONFIRMA) registra('Aguardando intervalo mínimo entre partidas'); return; }
+      comanda(k==='liga', motivo + ' ' + CONFIRMA + '/' + CONFIRMA);
+      S.seq = {k:null,n:0};
     }
   }
 
   function passo(dt){
     S.t += dt;
-    const ruido = (Math.random()-.5)*.004;
-    S.nivel += (S.ligado ? .042 : -.03)*dt + ruido;
-    S.nivel = Math.max(.02, Math.min(.98, S.nivel));
-    if (S.cruzou===null && ((!S.ligado && S.nivel < LIM_V) || (S.ligado && S.nivel > LIM_C))) S.cruzou = S.t;
+    const chegando = estadoEm(S.t - ATRASO);
+    S.nivel += (chegando ? .02 : -.015)*dt + (Math.random()-.5)*.002;
+    S.nivel = Math.max(.03, Math.min(.98, S.nivel));
     S.manual -= dt; if (S.manual <= 0) S.manual += 240;
-    S.prox -= dt; while (S.prox <= 0){ S.prox += 1; leitura(); }
     S.buf.push({t:S.t, n:S.nivel});
     while (S.buf.length && S.buf[0].t < S.t - 62) S.buf.shift();
     while (S.cmds.length && S.cmds[0].t < S.t - 62) S.cmds.shift();
+    while (S.hist.length > 2 && S.hist[1].t < S.t - ATRASO - 2) S.hist.shift();
+    const ref = S.buf.find(p => p.t >= S.t - 8);
+    if (ref && S.t - ref.t > 2) S.tend = (S.nivel - ref.n) / (S.t - ref.t) * 60 * 100;
+    S.prox -= dt; while (S.prox <= 0){ S.prox += 1; leitura(); }
   }
 
-  /* câmera */
+  /* câmera: vista de cima da tremonha */
   const cam = document.getElementById('cam');
+  function blob(cx, cy, rx, ry){
+    const pts = [], N = S.jit.length;
+    for (let i=0;i<N;i++){ const a = i/N*Math.PI*2, j = 1 + S.jit[i]*.07 + Math.sin(S.t*.7 + i*1.3)*.012;
+      pts.push([cx + Math.cos(a)*rx*j, cy + Math.sin(a)*ry*j]); }
+    return pts;
+  }
   function desenhaCam(){
     const {ctx,w,h} = fitCanvas(cam);
-    const g = ctx.createLinearGradient(0,0,0,h); g.addColorStop(0,'#2B302E'); g.addColorStop(1,'#1A1D1C');
-    ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
-    const topo = h*.17, base = h*.86, cx = w*.5, lt = w*.29, lb = w*.085;
-    const larg = y => lb + (lt-lb)*((base-y)/(base-topo));
+    ctx.fillStyle = '#232826'; ctx.fillRect(0,0,w,h);
+    const ox = w*.1, oy = h*.1, ow = w*.8, oh = h*.8, cx = ox+ow/2, cy = oy+oh/2;
+    const bw = ow*.36, bh = oh*.4, bx = cx-bw/2, by = cy-bh/2;
     ctx.save();
     if (S.poeira) ctx.filter = 'blur(3px)';
-    // estrutura
-    ctx.fillStyle = '#3A403D'; ctx.fillRect(cx-lt-26, topo-18, (lt+26)*2, 12);
-    ctx.fillRect(cx-lb-8, base, (lb+8)*2, h-base);
-    // material
-    const yN = base - S.nivel*(base-topo);
-    ctx.beginPath(); ctx.moveTo(cx-lb, base);
-    const lN = larg(yN), passos = 22;
-    ctx.lineTo(cx-lN, yN);
-    for (let i=1;i<passos;i++){ const x = cx-lN + (2*lN)*i/passos; const y = yN + Math.sin(i*1.7 + S.t*.6)*5 + Math.sin(i*3.1)*3 - Math.sin(Math.PI*i/passos)*10; ctx.lineTo(x,y); }
-    ctx.lineTo(cx+lN, yN); ctx.lineTo(cx+lb, base); ctx.closePath();
-    const gm = ctx.createLinearGradient(0,yN,0,base); gm.addColorStop(0,'#6A6F6B'); gm.addColorStop(1,'#3E4240');
-    ctx.fillStyle = gm; ctx.fill();
-    ctx.save(); ctx.clip();
-    S.rochas.forEach(r => { const y = topo + r.y*(base-topo); const x = cx + (r.x-.5)*2*larg(y); ctx.fillStyle = 'rgb('+r.g+','+(r.g+3)+','+(r.g+1)+')'; ctx.beginPath(); ctx.arc(x,y,r.r,0,7); ctx.fill(); });
+    ctx.fillStyle = '#6E736F'; ctx.fillRect(ox-12, oy-12, ow+24, oh+24);
+    ctx.fillStyle = '#4A4F4C'; ctx.fillRect(ox, oy, ow, oh);
+    const poly = (pts, cor) => { ctx.beginPath(); pts.forEach((p,i)=> i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])); ctx.closePath(); ctx.fillStyle = cor; ctx.fill(); };
+    poly([[ox,oy],[ox+ow,oy],[bx+bw,by],[bx,by]], '#5C615E');
+    poly([[ox,oy+oh],[ox+ow,oy+oh],[bx+bw,by+bh],[bx,by+bh]], '#434845');
+    poly([[ox,oy],[bx,by],[bx,by+bh],[ox,oy+oh]], '#515653');
+    poly([[ox+ow,oy],[bx+bw,by],[bx+bw,by+bh],[ox+ow,oy+oh]], '#575C59');
+    ctx.fillStyle = '#2A2E2D'; ctx.fillRect(bx, by, bw, bh);
+    ctx.beginPath(); ctx.arc(cx, cy, Math.min(bw,bh)*.34, 0, 7); ctx.fillStyle = '#3B403E'; ctx.fill(); ctx.strokeStyle = '#6E736F'; ctx.lineWidth = 2; ctx.stroke();
+    // material: a área vista de cima cresce com o nível
+    const l = S.nivel, rx = bw*.22 + (ow*.54 - bw*.22)*l, ry = bh*.22 + (oh*.54 - bh*.22)*l;
+    const pts = blob(cx, cy, rx, ry);
+    ctx.save();
+    ctx.beginPath(); ctx.rect(ox-12, oy-12, ow+24, oh+24); ctx.clip();
+    poly(pts, '#71766F');
+    ctx.clip();
+    S.rochas.forEach(r => { ctx.fillStyle = 'rgb('+r.g+','+(r.g+4)+','+(r.g+1)+')'; ctx.beginPath(); ctx.arc(cx + r.x*ow*.55, cy + r.y*oh*.55, r.r*1.4, 0, 7); ctx.fill(); });
     ctx.restore();
-    // paredes
-    ctx.strokeStyle = '#A9AFAB'; ctx.lineWidth = 4; ctx.lineJoin = 'round';
-    ctx.beginPath(); ctx.moveTo(cx-lt, topo); ctx.lineTo(cx-lb, base); ctx.lineTo(cx+lb, base); ctx.lineTo(cx+lt, topo); ctx.stroke();
-    // queda de material quando o primário está ligado
-    if (S.ligado){
-      if (S.fluxo.length < 40) S.fluxo.push({x:(Math.random()-.5)*w*.08, y:0, v:.6+Math.random()*.6, r:1.5+Math.random()*2.5});
-    }
-    S.fluxo.forEach(p => { p.y += p.v*6; });
-    S.fluxo = S.fluxo.filter(p => p.y < (yN - h*.06) && (S.ligado || p.y > 0));
-    ctx.fillStyle = '#7C817D';
-    S.fluxo.forEach(p => { ctx.beginPath(); ctx.arc(cx + p.x + w*.05, h*.04 + p.y, p.r, 0, 7); ctx.fill(); });
+    // material chegando pelo chute quando a correia descarrega
+    if (estadoEm(S.t - ATRASO + .5)){ if (S.fluxo.length < 30) S.fluxo.push({x:(Math.random()-.5)*ow*.12, p:0, v:.015+Math.random()*.02, r:1.5+Math.random()*2.5}); }
+    S.fluxo.forEach(f => f.p += f.v);
+    S.fluxo = S.fluxo.filter(f => f.p < 1);
+    ctx.fillStyle = '#8E938D';
+    S.fluxo.forEach(f => { ctx.globalAlpha = 1 - f.p*.6; ctx.beginPath(); ctx.arc(cx + f.x, oy - 6 + f.p*(cy - oy)*.7, f.r*(1 - f.p*.4), 0, 7); ctx.fill(); });
+    ctx.globalAlpha = 1;
     if (S.poeira){ ctx.fillStyle = 'rgba(150,122,86,.42)'; ctx.fillRect(0,0,w,h); }
     ctx.restore();
-    // granulado
     ctx.fillStyle = 'rgba(255,255,255,.05)';
     for (let i=0;i<220;i++) ctx.fillRect(Math.random()*w, Math.random()*h, 1, 1);
-    // ROI e faixas
-    const rx = cx-lt-14, ry = topo-6, rw = (lt+14)*2, rh = base-topo+12;
-    ctx.setLineDash([8,6]); ctx.lineWidth = 2; ctx.strokeStyle = S.invalido ? C.alerta : C.ambar;
-    ctx.strokeRect(rx, ry, rw, rh);
-    ctx.globalAlpha = .55; ctx.lineWidth = 1;
-    [LIM_V, LIM_C].forEach(l => { const y = base - l*(base-topo); ctx.beginPath(); ctx.moveTo(rx, y); ctx.lineTo(rx+rw, y); ctx.stroke(); });
-    ctx.globalAlpha = 1; ctx.setLineDash([]);
-    // textos
+    // contorno do que o modelo vê como pedra
+    ctx.save(); ctx.beginPath(); ctx.rect(ox-12, oy-12, ow+24, oh+24); ctx.clip();
+    ctx.beginPath(); pts.forEach((p,i)=> i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])); ctx.closePath();
+    ctx.fillStyle = S.invalido ? 'rgba(242,135,95,.10)' : 'rgba(232,163,61,.14)'; ctx.fill();
+    ctx.lineWidth = 2.5; ctx.strokeStyle = S.invalido ? C.alerta : C.ambar; if (S.invalido) ctx.setLineDash([8,6]); ctx.stroke(); ctx.setLineDash([]);
+    ctx.restore();
+    ctx.setLineDash([6,5]); ctx.lineWidth = 1.5; ctx.strokeStyle = 'rgba(242,239,232,.45)'; ctx.strokeRect(ox-4, oy-4, ow+8, oh+8); ctx.setLineDash([]);
     const fs = Math.max(10, Math.min(13, w/48));
     ctx.font = '500 '+fs+'px "IBM Plex Mono", monospace'; ctx.textBaseline = 'top';
-    ctx.fillStyle = 'rgba(242,239,232,.85)'; ctx.fillText('CAM 02 · BRITADOR SECUNDÁRIO', 14, 14);
-    const hora = relogio(S.t); const tw = ctx.measureText(hora).width;
-    ctx.fillText(hora, w - tw - 14, 14);
-    ctx.fillStyle = '#E5484D'; if (Math.floor(S.t*2)%2===0){ ctx.beginPath(); ctx.arc(w - tw - 26, 14+fs/2, 4, 0, 7); ctx.fill(); }
-    ctx.fillStyle = 'rgba(242,239,232,.6)';
-    ctx.fillText('CHEIO', rx + rw + 8 > w - 60 ? rx + 6 : rx + rw + 8, base - LIM_C*(base-topo) - fs - 4);
-    ctx.fillText('VAZIO', rx + rw + 8 > w - 60 ? rx + 6 : rx + rw + 8, base - LIM_V*(base-topo) + 4);
-    // etiqueta de classificação
-    const conf = Math.max(S.probs.vazio, S.probs.inter, S.probs.cheio);
-    const etq = S.invalido ? 'IMAGEM INVÁLIDA · '+fmt(conf) : nomes[S.classe].toUpperCase()+' · '+fmt(conf);
+    ctx.fillStyle = 'rgba(242,239,232,.85)'; ctx.fillText('CAM 02 · VISTA DE CIMA', 12, 10);
+    const hora = relogio(S.t), tw = ctx.measureText(hora).width;
+    ctx.fillText(hora, w - tw - 12, 10);
+    ctx.fillStyle = '#E5484D'; if (Math.floor(S.t*2)%2===0){ ctx.beginPath(); ctx.arc(w - tw - 24, 10+fs/2, 4, 0, 7); ctx.fill(); }
+    const occ = Math.round(S.nivel*100), seta = S.tend > 30 ? ' ↑' : S.tend < -30 ? ' ↓' : '';
+    const etq = S.invalido ? 'IMAGEM INVÁLIDA · SEM AÇÃO' : nomes[S.classe].toUpperCase() + ' · ' + occ + '%' + seta;
     ctx.font = '600 '+(fs+1)+'px "IBM Plex Mono", monospace';
-    const ew = ctx.measureText(etq).width + 18;
-    ctx.fillStyle = S.invalido ? C.alerta : C.ambar; ctx.fillRect(rx, ry - fs - 16, ew, fs + 12);
-    ctx.fillStyle = C.carvao; ctx.fillText(etq, rx + 9, ry - fs - 10);
+    const ew = ctx.measureText(etq).width + 18, ey = h - fs - 24;
+    ctx.fillStyle = S.invalido ? C.alerta : C.ambar; ctx.fillRect(12, ey, ew, fs + 12);
+    ctx.fillStyle = C.carvao; ctx.fillText(etq, 21, ey + 6);
   }
 
   /* gráfico */
@@ -757,12 +827,13 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;align-ite
     const pill = $('estadoPill');
     if (S.invalido){ pill.className = 'pill alert'; pill.textContent = 'OPERADOR ALERTADO'; }
     else { pill.className = 'pill ' + (S.ligado ? 'on' : 'off'); pill.textContent = S.ligado ? 'ACIONADO' : 'DESACIONADO'; }
-    const alvo = (S.seq.c==='vazio' && !S.ligado) || (S.seq.c==='cheio' && S.ligado);
-    $('confirm').textContent = (alvo ? Math.min(S.seq.n, CONFIRMA) : 0) + '/' + CONFIRMA;
-    $('reacao').textContent = S.reacao===null ? '—' : S.reacao.toFixed(0)+' s';
+    $('ocup').textContent = Math.round(S.nivel*100) + '%';
+    $('tend').textContent = Math.abs(S.tend) < 10 ? 'Estável' : fmtTend(S.tend);
+    $('confirm').textContent = Math.min(S.seq.n, CONFIRMA) + '/' + CONFIRMA;
+    $('atrasoTxt').textContent = ATRASO + ' s';
     const m = Math.ceil(S.manual); $('manual').textContent = Math.floor(m/60)+':'+String(m%60).padStart(2,'0');
     $('leituras').textContent = S.leituras.toLocaleString('pt-BR');
-    $('hcClasse').textContent = S.invalido ? 'Imagem inválida' : nomes[S.classe];
+    $('hcClasse').textContent = S.invalido ? 'Imagem inválida' : nomes[S.classe] + ' · ' + Math.round(S.nivel*100) + '%';
     $('hcPrim').textContent = S.ligado ? 'LIGADO' : 'DESLIGADO';
     $('hcPrim').style.color = S.ligado ? C.ambar : C.txt;
   }
