@@ -1,0 +1,41 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.levanta.app'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.levanta.app"
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    // Chave fixa (de depuração) para que cada APK novo instale por cima do anterior.
+    signingConfigs {
+        fixa {
+            storeFile file('levanta-debug.keystore')
+            storePassword 'levanta'
+            keyAlias 'levanta'
+            keyPassword 'levanta'
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.fixa
+        }
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.fixa
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
